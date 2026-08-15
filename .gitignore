@@ -1,0 +1,7 @@
+node_modules/
+dist/
+web-ext-artifacts/
+*.xpi
+*.zip
+.DS_Store
+.amo-upload-uuid

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Kawase test page</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": "Test product",
+    "offers": { "@type": "Offer", "price": "19.99", "priceCurrency": "USD" }
+  }
+  </script>
+
+  <style>
+    :root { color-scheme: light dark; }
+    body {
+      max-width: 720px; margin: 0 auto; padding: 48px 24px 96px;
+      font: 15px/1.6 ui-sans-serif, system-ui, sans-serif;
+    }
+    h1 { font-size: 24px; margin: 0 0 4px; }
+    .lede { color: #6b7280; margin: 0 0 36px; }
+    h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: #6b7280;
+         margin: 34px 0 10px; }
+    table { width: 100%; border-collapse: collapse; }
+    td { padding: 7px 0; border-bottom: 1px solid rgba(128,128,128,.22); vertical-align: top; }
+    td:first-child { color: #6b7280; font-size: 13px; width: 45%; }
+    td:last-child { font-variant-numeric: tabular-nums; }
+    code { font-family: ui-monospace, monospace; font-size: 13px; }
+    .negative { color: #b91c1c; }
+    #dynamic button { margin-top: 10px; padding: 6px 12px; font: inherit; }
+  </style>
+</head>
+<body>
+  <h1>Kawase test page</h1>
+  <p class="lede">Every row below exercises a different part of the detector. The page declares USD
+    in its structured data, so a bare dollar sign should resolve to USD.</p>
+
+  <h2>Common formats</h2>
+  <table>
+    <tr><td>Symbol first</td><td>$19.99</td></tr>
+    <tr><td>Thousands</td><td>$1,299.00</td></tr>
+    <tr><td>European grouping</td><td>1.234,56 €</td></tr>
+    <tr><td>French spacing</td><td>1 234,56 €</td></tr>
+    <tr><td>Swiss apostrophe</td><td>CHF 1'234.50</td></tr>
+    <tr><td>Code first</td><td>JPY 12,800</td></tr>
+    <tr><td>Code last</td><td>10.50 USD</td></tr>
+    <tr><td>Pound</td><td>£249</td></tr>
+    <tr><td>Won</td><td>₩1,250,000</td></tr>
+    <tr><td>Indian grouping</td><td>₹1,23,456.78</td></tr>
+    <tr><td>Yen with kanji</td><td>3,980円</td></tr>
+    <tr><td>Japanese myriad</td><td>¥1万 and ¥2.5億</td></tr>
+    <tr><td>Three decimal currency</td><td>KWD 1.234</td></tr>
+  </table>
+
+  <h2>Disambiguation</h2>
+  <table>
+    <tr><td>Explicit prefixes</td><td>US$45, C$60, A$70, NZ$80, HK$90, S$100, NT$110, R$120</td></tr>
+    <tr><td>Bare dollar (should follow the page currency)</td><td>$50</td></tr>
+    <tr><td>Bare yen</td><td>¥500</td></tr>
+    <tr><td>Krona family</td><td>199 kr</td></tr>
+  </table>
+
+  <h2>Edge cases</h2>
+  <table>
+    <tr><td>Magnitude suffixes</td><td>$1.2M, $100k, $4.5 billion</td></tr>
+    <tr><td>Range</td><td>$10-$20</td></tr>
+    <tr><td>Negative</td><td class="negative">-$12.34</td></tr>
+    <tr><td>Accounting negative</td><td class="negative">($5.00)</td></tr>
+    <tr><td>Zero</td><td>$0.00</td></tr>
+    <tr><td>Sub cent</td><td>$0.0042</td></tr>
+    <tr><td>Adjacent to CJK text</td><td>この商品は¥1000です</td></tr>
+    <tr><td>Inside a sentence</td><td>The upgrade costs $8.99 per month after the trial.</td></tr>
+  </table>
+
+
+  <h2>Middle East</h2>
+  <table>
+    <tr><td>Dirham with Arabic digits</td><td dir="rtl">د.إ ١٢٣٫٥٠</td></tr>
+    <tr><td>Riyal with Arabic grouping</td><td dir="rtl">١٬٢٣٤٫٥٦ ر.س</td></tr>
+    <tr><td>Shared riyal sign</td><td>﷼ 500</td></tr>
+    <tr><td>Qatari riyal</td><td>ر.ق 1,299</td></tr>
+    <tr><td>Three decimal dinars</td><td>KWD 1.234, BHD 12.500, OMR 0.750</td></tr>
+    <tr><td>Shekel</td><td>₪250</td></tr>
+    <tr><td>Turkish lira</td><td>₺1.499,90</td></tr>
+    <tr><td>Persian digits</td><td dir="rtl">IRR ۱۲۳۴۵</td></tr>
+  </table>
+
+  <h2>East and South Asia</h2>
+  <table>
+    <tr><td>Chinese yuan</td><td>CN¥199, RMB 199, 元 199</td></tr>
+    <tr><td>Korean won</td><td>₩1,250,000 and 50,000원</td></tr>
+    <tr><td>Macanese pataca</td><td>MOP$88</td></tr>
+    <tr><td>Thai baht</td><td>฿๑๒๓</td></tr>
+    <tr><td>Bangladeshi taka</td><td>৳১২৩</td></tr>
+    <tr><td>Devanagari digits</td><td>₹१,२३,४५६</td></tr>
+  </table>
+
+  <h2>Latin America and Africa</h2>
+  <table>
+    <tr><td>Colombian peso</td><td>COP 45.000 and COL$45.000</td></tr>
+    <tr><td>Peruvian sol</td><td>S/ 199.90</td></tr>
+    <tr><td>Bolivian boliviano</td><td>Bs. 1.500</td></tr>
+    <tr><td>Paraguayan guarani</td><td>₲ 250.000</td></tr>
+    <tr><td>Cordoba shares C$ with Canada</td><td>C$60</td></tr>
+    <tr><td>Kenyan shilling</td><td>KSh 4,500</td></tr>
+    <tr><td>Nigerian naira</td><td>₦25,000</td></tr>
+    <tr><td>Ghanaian cedi</td><td>GH₵120</td></tr>
+    <tr><td>CFA franc</td><td>CFA 15 000</td></tr>
+    <tr><td>Moroccan dirham</td><td>د.م. 350</td></tr>
+  </table>
+
+  <h2>Must not be converted</h2>
+  <table>
+    <tr><td>Version number</td><td>Version 2.1.4</td></tr>
+    <tr><td>Phone number</td><td>Call 555-1234</td></tr>
+    <tr><td>Date</td><td>Posted 2024-05-11 at 10:30</td></tr>
+    <tr><td>Rating</td><td>4.5 out of 5 stars</td></tr>
+    <tr><td>Counts</td><td>item 5 of 20</td></tr>
+    <tr><td>Code block</td><td><code>const price = $5 + total;</code></tr>
+    <tr><td>Text input</td><td><input type="text" value="$25.00" size="12"></td></tr>
+    <tr><td>Glued to letters</td><td>abc$5 and $5abc</td></tr>
+    <tr><td>Terminal model</td><td>VT100 terminal</td></tr>
+    <tr><td>Game title</td><td>FC 24 release date</td></tr>
+    <tr><td>Microphone</td><td>SM 58 microphone</td></tr>
+  </table>
+
+  <h2>Dynamic content</h2>
+  <div id="dynamic">
+    <p>Prices added after load should be picked up by the mutation observer.</p>
+    <button type="button" id="add">Add a price</button>
+    <ul id="list"></ul>
+  </div>
+
+  <script>
+    let n = 0;
+    document.getElementById('add').addEventListener('click', () => {
+      n += 1;
+      const li = document.createElement('li');
+      li.textContent = 'Late arrival ' + n + ': $' + (12.5 * n).toFixed(2);
+      document.getElementById('list').appendChild(li);
+    });
+  </script>
+</body>
+</html>

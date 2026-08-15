@@ -1,0 +1,79 @@
+{
+  "manifest_version": 3,
+  "name": "Kawase",
+  "version": "1.0.0",
+  "description": "Show every price on the web in the currency you actually think in, converted at today's published rate.",
+  "author": "takumi yamada",
+  "homepage_url": "https://github.com/takumiymd/kawase",
+
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "kawase@takumiymd",
+      "strict_min_version": "142.0",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
+    }
+  },
+
+  "permissions": [
+    "storage",
+    "alarms",
+    "scripting"
+  ],
+
+  "host_permissions": [
+    "<all_urls>"
+  ],
+
+  "background": {
+    "scripts": [
+      "src/lib/currencies.js",
+      "src/lib/parse.js",
+      "src/lib/format.js",
+      "src/lib/rates.js",
+      "src/lib/settings.js",
+      "src/background/background.js"
+    ]
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": [
+        "src/lib/currencies.js",
+        "src/lib/parse.js",
+        "src/lib/detect.js",
+        "src/lib/format.js",
+        "src/lib/rates.js",
+        "src/lib/settings.js",
+        "src/content/page-context.js",
+        "src/content/content.js"
+      ],
+      "css": ["src/content/content.css"],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+
+  "action": {
+    "default_title": "Kawase",
+    "default_popup": "src/popup/popup.html",
+    "default_icon": {
+      "16": "src/icons/icon-small.svg",
+      "32": "src/icons/icon-small.svg",
+      "48": "src/icons/icon.svg"
+    }
+  },
+
+  "options_ui": {
+    "page": "src/options/options.html",
+    "open_in_tab": true
+  },
+
+  "icons": {
+    "48": "src/icons/icon.svg",
+    "96": "src/icons/icon.svg",
+    "128": "src/icons/icon.svg"
+  }
+}

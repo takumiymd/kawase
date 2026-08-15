@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Kawase settings</title>
+  <link rel="stylesheet" href="../ui/theme.css">
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="shell">
+    <header class="page-header">
+      <div class="brand">
+        <span class="wordmark">kawase</span>
+        <span class="sub">為替</span>
+      </div>
+      <p class="tagline">Prices on every page, shown in the currency you think in.</p>
+    </header>
+
+    <nav class="tabs" id="tabs" role="tablist">
+      <button role="tab" data-tab="general" aria-selected="true">General</button>
+      <button role="tab" data-tab="detection" aria-selected="false">Detection</button>
+      <button role="tab" data-tab="sites" aria-selected="false">Sites</button>
+      <button role="tab" data-tab="rates" aria-selected="false">Rates</button>
+    </nav>
+
+    <main>
+      <section class="panel" data-panel="general">
+        <div class="card">
+          <div class="setting">
+            <div class="setting-text">
+              <span class="setting-title">Convert prices</span>
+              <span class="setting-note">The master switch. Individual sites can still override it.</span>
+            </div>
+            <button id="enabled" class="switch" role="switch" aria-checked="true"></button>
+          </div>
+
+          <div class="setting">
+            <div class="setting-text">
+              <span class="setting-title">Show prices in</span>
+              <span class="setting-note">Every detected price is converted into this currency.</span>
+            </div>
+            <select id="target" class="field"></select>
+          </div>
+
+          <div class="setting">
+            <div class="setting-text">
+              <span class="setting-title">Display</span>
+              <span class="setting-note">Replace the price, show both, or reveal the conversion on hover.</span>
+            </div>
+            <div class="segmented narrow" id="mode" role="group">
+              <button type="button" data-value="replace">Replace</button>
+              <button type="button" data-value="append">Alongside</button>
+              <button type="button" data-value="hover">On hover</button>
+            </div>
+          </div>
+
+          <div class="setting">
+            <div class="setting-text">
+              <span class="setting-title">Highlight</span>
+              <span class="setting-note">How a converted price is marked so you know it was changed.</span>
+            </div>
+            <div class="segmented narrow" id="highlight" role="group">
+              <button type="button" data-value="underline">Underline</button>
+              <button type="button" data-value="badge">Badge</button>
+              <button type="button" data-value="none">None</button>
+            </div>
+          </div>
+
+          <div class="setting">
+            <div class="setting-text">
+              <span class="setting-title">Decimals</span>
+              <span class="setting-note">Automatic drops cents once an amount passes a thousand.</span>
+            </div>
+            <div class="segmented narrow" id="precision" role="group">
+              <button type="button" data-value="auto">Auto</button>
+              <button type="button" data-value="0">None</button>
+              <button type="button" data-value="2">Always two</button>
+            </div>
+          </div>
+
+          <div class="setting">
+            <div class="setting-text">
+              <span class="setting-title">Mark conversions as approximate</span>
+              <span class="setting-note">Prefixes converted amounts with a nearly equal sign.</span>
+            </div>
+            <button id="approx" class="switch" role="switch" aria-checked="true"></button>
+          </div>
+
+          <div class="setting">
+            <div class="setting-text">
+              <span class="setting-title">Shorten very large amounts</span>
+              <span class="setting-note">Renders ten million and above compactly, for example 12M.</span>
+            </div>
+            <button id="compactLarge" class="switch" role="switch" aria-checked="true"></button>
+          </div>
+
+          <div class="setting">
+            <div class="setting-text">
+              <span class="setting-title">Number formatting</span>
+              <span class="setting-note">Which locale decides grouping and symbol placement.</span>
+            </div>
+            <select id="locale" class="field"></select>
+          </div>
+        </div>
+
+        <div class="card preview-card">
+          <span class="label">Preview</span>
+          <div class="preview-sample" id="previewSample"></div>
+        </div>
+      </section>
+
+      <section class="panel" data-panel="detection" hidden>
+        <div class="card">
+          <div class="setting">
+            <div class="setting-text">
+              <span class="setting-title">Read the currency from the page</span>
+              <span class="setting-note">Uses structured product data, page metadata and the domain to work out
+                what an ambiguous symbol means. Turning this off falls back to the defaults below.</span>
+            </div>
+            <button id="autoDetectPageCurrency" class="switch" role="switch" aria-checked="true"></button>
+          </div>
+
+          <div class="setting">
+            <div class="setting-text">
+              <span class="setting-title">Convert prices already in the target currency</span>
+              <span class="setting-note">Off by default, since converting a price into itself is only noise.</span>
+            </div>
+            <button id="convertMatchingCurrency" class="switch" role="switch" aria-checked="false"></button>
+          </div>
+        </div>
+
+        <div class="card">
+          <span class="label">Ambiguous symbols</span>
+          <p class="card-note">
+            Several currencies share a symbol. When the page gives no clue, these choices decide.
+          </p>
+          <div class="symbol-grid" id="symbolGrid"></div>
+        </div>
+      </section>
+
+      <section class="panel" data-panel="sites" hidden>
+        <div class="card">
+          <span class="label">Site rules</span>
+          <p class="card-note">
+            Rules created from the popup appear here. Removing a rule returns the site to the global settings.
+          </p>
+          <div id="siteList" class="site-list"></div>
+        </div>
+      </section>
+
+      <section class="panel" data-panel="rates" hidden>
+        <div class="card">
+          <div class="setting">
+            <div class="setting-text">
+              <span class="setting-title">Source</span>
+              <span class="setting-note">Automatic tries the wider dataset first and falls back to the
+                European Central Bank reference rates.</span>
+            </div>
+            <select id="provider" class="field">
+              <option value="auto">Automatic</option>
+              <option value="erapi">open.er-api.com</option>
+              <option value="frankfurter">frankfurter.dev</option>
+            </select>
+          </div>
+
+          <div class="setting">
+            <div class="setting-text">
+              <span class="setting-title">Refresh every</span>
+              <span class="setting-note">Published rates change at most once a day, so there is little value
+                in checking often.</span>
+            </div>
+            <select id="refreshHours" class="field">
+              <option value="1">Hour</option>
+              <option value="6">6 hours</option>
+              <option value="12">12 hours</option>
+              <option value="24">Day</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="rate-summary">
+            <div>
+              <span class="label">Cached table</span>
+              <p class="rate-meta" id="rateMeta">Loading</p>
+            </div>
+            <button id="refreshNow" class="ghost">Refresh now</button>
+          </div>
+          <div class="rate-sample" id="rateSample"></div>
+        </div>
+
+        <div class="card about">
+          <span class="label">About</span>
+          <p class="card-note">
+            Kawase converts prices in place using published daily reference rates. Rates are indicative:
+            a card transaction settles at the rate your bank uses, which includes a spread.
+          </p>
+          <p class="card-note" id="version"></p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="../lib/currencies.js"></script>
+  <script src="../lib/parse.js"></script>
+  <script src="../lib/format.js"></script>
+  <script src="../lib/rates.js"></script>
+  <script src="../lib/settings.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>

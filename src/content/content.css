@@ -1,0 +1,35 @@
+span[data-kawase] {
+  cursor: help;
+}
+
+span[data-kawase].kawase-highlight-underline {
+  text-decoration: underline dotted rgba(45, 158, 122, 0.85) !important;
+  text-decoration-thickness: 1px !important;
+  text-underline-offset: 0.18em !important;
+}
+
+span[data-kawase].kawase-highlight-badge {
+  border-radius: 3px;
+  outline: 1px solid rgba(45, 158, 122, 0.35);
+  outline-offset: 1px;
+  background-color: rgba(78, 207, 164, 0.14);
+}
+
+span[data-kawase] .kawase-appended {
+  opacity: 0.78;
+  font-size: 0.95em;
+}
+
+@media (prefers-color-scheme: dark) {
+  span[data-kawase].kawase-highlight-underline {
+    text-decoration-color: rgba(78, 207, 164, 0.85) !important;
+  }
+}
+
+@media print {
+  span[data-kawase] {
+    text-decoration: none !important;
+    outline: none !important;
+    background: none !important;
+  }
+}

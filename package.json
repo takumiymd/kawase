@@ -1,0 +1,19 @@
+{
+  "name": "kawase",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Firefox extension that converts prices on any page into your preferred currency",
+  "scripts": {
+    "test": "node --test test/",
+    "lint": "web-ext lint --source-dir .",
+    "start": "web-ext run --source-dir . --browser-console",
+    "build": "web-ext build --source-dir . --artifacts-dir dist --overwrite-dest"
+  },
+  "devDependencies": {
+    "jsdom": "^29.1.1",
+    "web-ext": "^10.6.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

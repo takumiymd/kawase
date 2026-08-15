@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" role="img" aria-label="Kawase">
+  <!-- Toolbar size: the ring is dropped so the mark stays readable at 16px. -->
+  <rect x="0.5" y="0.5" width="31" height="31" rx="8" fill="#12161b" stroke="#2b323b"/>
+  <g fill="none" stroke="#4ecfa4" stroke-width="2.6" stroke-linecap="round">
+    <path d="M10 9.5 16 16.5"/>
+    <path d="M22 9.5 16 16.5"/>
+    <path d="M16 16.5v6.5"/>
+    <path d="M10.8 18.2h10.4"/>
+    <path d="M10.8 21.4h10.4"/>
+  </g>
+</svg>
