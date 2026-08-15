@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Kawase">
+  <defs>
+    <linearGradient id="plate" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1b2027"/>
+      <stop offset="1" stop-color="#0d1014"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="1" y="1" width="62" height="62" rx="15" fill="url(#plate)"/>
+  <rect x="1.5" y="1.5" width="61" height="61" rx="14.5" fill="none" stroke="#2b323b" stroke-width="1"/>
+
+  <!-- Exchange ring: two arcs turning into each other. -->
+  <g fill="none" stroke="#4ecfa4" stroke-width="3" stroke-linecap="round">
+    <path d="M13 26a19 19 0 0 1 31.6-8.4" opacity=".95"/>
+    <path d="M51 38a19 19 0 0 1-31.6 8.4" opacity=".95"/>
+  </g>
+  <g fill="#4ecfa4">
+    <path d="M45.8 10.6 47.6 19l-8.4-1.9z"/>
+    <path d="M18.2 53.4 16.4 45l8.4 1.9z"/>
+  </g>
+
+  <!-- Yen mark, drawn as strokes so no font is required. -->
+  <g fill="none" stroke="#eef2f6" stroke-width="3.4" stroke-linecap="round">
+    <path d="M24 23.5 32 33"/>
+    <path d="M40 23.5 32 33"/>
+    <path d="M32 33v9.5"/>
+    <path d="M25.5 35.4h13"/>
+    <path d="M25.5 39.6h13"/>
+  </g>
+</svg>

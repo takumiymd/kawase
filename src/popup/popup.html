@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Kawase</title>
+  <link rel="stylesheet" href="../ui/theme.css">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header class="header">
+    <div class="brand">
+      <span class="wordmark">kawase</span>
+      <span class="sub">為替</span>
+    </div>
+    <button id="masterToggle" class="switch" role="switch" aria-checked="true" aria-label="Enable conversion"></button>
+  </header>
+
+  <main>
+    <section class="block">
+      <div class="row-label">
+        <span class="label">Show prices in</span>
+        <span id="rateStatus" class="status"></span>
+      </div>
+
+      <div class="combo" id="combo">
+        <button type="button" class="combo-trigger" id="comboTrigger" aria-haspopup="listbox" aria-expanded="false">
+          <span class="combo-code mono" id="comboCode">---</span>
+          <span class="combo-name" id="comboName">Loading</span>
+          <svg class="chevron" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="combo-panel" id="comboPanel" hidden>
+          <input type="text" id="comboSearch" class="combo-search" placeholder="Search by code or name" autocomplete="off" spellcheck="false">
+          <ul class="combo-list" id="comboList" role="listbox" tabindex="-1"></ul>
+        </div>
+      </div>
+
+      <div class="rate-line">
+        <span id="rateText" class="mono">Fetching rates</span>
+        <button id="refreshRates" class="icon-button" title="Refresh rates" aria-label="Refresh rates">
+          <svg viewBox="0 0 14 14" aria-hidden="true"><path d="M12 7a5 5 0 1 1-1.6-3.7M12 1.6V4.4H9.2" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+
+      <div class="preview" id="preview" hidden>
+        <span class="preview-from mono" id="previewFrom"></span>
+        <span class="preview-arrow">→</span>
+        <span class="preview-to mono" id="previewTo"></span>
+      </div>
+    </section>
+
+    <section class="block">
+      <span class="label">Display</span>
+      <div class="segmented" id="modeGroup" role="group" aria-label="Display mode">
+        <button type="button" data-mode="replace" aria-pressed="false">Replace</button>
+        <button type="button" data-mode="append" aria-pressed="false">Alongside</button>
+        <button type="button" data-mode="hover" aria-pressed="false">On hover</button>
+      </div>
+    </section>
+
+    <section class="block" id="siteBlock">
+      <div class="row-label">
+        <span class="label">This site</span>
+        <span class="host mono" id="hostname"></span>
+      </div>
+
+      <div class="row">
+        <div class="row-text">
+          <span class="row-title">Convert on this site</span>
+          <span class="row-note" id="siteNote"></span>
+        </div>
+        <button id="siteToggle" class="switch" role="switch" aria-checked="true" aria-label="Convert on this site"></button>
+      </div>
+
+      <div class="row">
+        <div class="row-text">
+          <span class="row-title">Prices here are in</span>
+          <span class="row-note" id="sourceNote"></span>
+        </div>
+        <select id="sourceOverride" class="field compact"></select>
+      </div>
+    </section>
+
+    <div class="notice" id="notice" hidden>
+      <span id="noticeText"></span>
+      <button id="noticeAction" class="ghost" hidden></button>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <span id="countText" class="count"></span>
+    <button id="openOptions" class="link-button">All settings</button>
+  </footer>
+
+  <script src="../lib/currencies.js"></script>
+  <script src="../lib/parse.js"></script>
+  <script src="../lib/format.js"></script>
+  <script src="../lib/rates.js"></script>
+  <script src="../lib/settings.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
