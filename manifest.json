@@ -1,14 +1,14 @@
 {
   "manifest_version": 3,
   "name": "Kawase",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Show every price on the web in the currency you actually think in, converted at today's published rate.",
   "author": "takumi yamada",
   "homepage_url": "https://github.com/takumiymd/kawase",
 
   "browser_specific_settings": {
     "gecko": {
-      "id": "kawase@takumiymd",
+      "id": "kawase-app@takumiymd",
       "strict_min_version": "142.0",
       "data_collection_permissions": {
         "required": ["none"]
