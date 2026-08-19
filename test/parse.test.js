@@ -106,3 +106,18 @@ test('bidi marks inside a number are dropped', () => {
 test('arabic thousands separators group correctly', () => {
   assert.strictEqual(value('١٬٢٣٤٫٥٦'), 1234.56);
 });
+
+test('fullwidth digits and punctuation fold to ascii', () => {
+  assert.strictEqual(parse.normalizeDigits('２，６００．５０'), '2,600.50');
+  assert.strictEqual(value('２，６００'), 2600);
+  assert.strictEqual(value('１００，０００'), 100000);
+});
+
+test('compound cjk amounts parse to total numeric value', () => {
+  assert.strictEqual(value('1億1980万'), 119800000);
+  assert.strictEqual(value('1億480万'), 104800000);
+  assert.strictEqual(value('1億480'), 104800000);
+  assert.strictEqual(value('2億990万'), 209900000);
+  assert.strictEqual(value('1億'), 100000000);
+  assert.strictEqual(value('1兆2000億'), 1200000000000);
+});
