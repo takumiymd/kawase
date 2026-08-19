@@ -229,3 +229,41 @@ test('but those currencies still match through their iso code', () => {
   assert.strictEqual(one('MZN 500').code, 'MZN');
   assert.strictEqual(one('CDF 2,500').code, 'CDF');
 });
+
+test('japanese fullwidth numbers and yen', () => {
+  const match1 = one('２，６００万円');
+  assert.strictEqual(match1.code, 'JPY');
+  assert.strictEqual(match1.value, 26000000);
+
+  const match2 = one('￥１００，０００');
+  assert.strictEqual(match2.code, 'JPY');
+  assert.strictEqual(match2.value, 100000);
+
+  const match3 = one('５００円');
+  assert.strictEqual(match3.code, 'JPY');
+  assert.strictEqual(match3.value, 500);
+});
+
+test('compound japanese numeral magnitudes', () => {
+  assert.strictEqual(one('1億1980万円').value, 119800000);
+  assert.strictEqual(one('1億480万円').value, 104800000);
+  assert.strictEqual(one('2億990万円').value, 209900000);
+  assert.strictEqual(one('1億円').value, 100000000);
+});
+
+test('japanese real estate prices and ranges', () => {
+  const matches1 = find('本体価格 2,600万円 〜 2,699万円');
+  assert.strictEqual(matches1.length, 2);
+  assert.strictEqual(matches1[0].value, 26000000);
+  assert.strictEqual(matches1[1].value, 26990000);
+
+  const matches2 = find('(79.7万円 〜 82.7万円/坪)');
+  assert.strictEqual(matches2.length, 2);
+  assert.strictEqual(matches2[0].value, 797000);
+  assert.strictEqual(matches2[1].value, 827000);
+
+  const matches3 = find('2,600万〜2,699万円');
+  assert.strictEqual(matches3.length, 2);
+  assert.strictEqual(matches3[0].value, 26000000);
+  assert.strictEqual(matches3[1].value, 26990000);
+});
