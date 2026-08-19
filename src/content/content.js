@@ -103,26 +103,41 @@
     return false;
   }
 
-  function collectTextNodes(rootNode) {
-    const nodes = [];
-    if (!rootNode) return nodes;
+  function collectCandidates(rootNode) {
+    const textNodes = [];
+    const elements = [];
+    if (!rootNode) return { textNodes, elements };
 
-    const walker = document.createTreeWalker(rootNode, NodeFilter.SHOW_TEXT, {
+    const walker = document.createTreeWalker(rootNode, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT, {
       acceptNode(node) {
-        if (createdNodes.has(node)) return NodeFilter.FILTER_REJECT;
-        const text = node.nodeValue;
-        if (!text || text.length < 2 || !detect.hasDigit(text)) return NodeFilter.FILTER_REJECT;
-        if (isInsideSkipped(node)) return NodeFilter.FILTER_REJECT;
-        return NodeFilter.FILTER_ACCEPT;
+        if (node.nodeType === Node.TEXT_NODE) {
+          if (createdNodes.has(node)) return NodeFilter.FILTER_REJECT;
+          const text = node.nodeValue;
+          if (!text || text.length < 2 || !detect.hasDigit(text)) return NodeFilter.FILTER_REJECT;
+          if (isInsideSkipped(node)) return NodeFilter.FILTER_REJECT;
+          return NodeFilter.FILTER_ACCEPT;
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+          if (shouldSkipElement(node)) return NodeFilter.FILTER_REJECT;
+          const count = node.childNodes.length;
+          if (count >= 2 && count <= 12) {
+            const text = node.textContent;
+            if (text && text.length >= 2 && text.length <= 140 && detect.hasDigit(text)) {
+              return NodeFilter.FILTER_ACCEPT;
+            }
+          }
+          return NodeFilter.FILTER_SKIP;
+        }
+        return NodeFilter.FILTER_SKIP;
       }
     });
 
-    let node = walker.nextNode();
-    while (node) {
-      nodes.push(node);
-      node = walker.nextNode();
+    let current = walker.nextNode();
+    while (current) {
+      if (current.nodeType === Node.TEXT_NODE) textNodes.push(current);
+      else if (current.nodeType === Node.ELEMENT_NODE) elements.push(current);
+      current = walker.nextNode();
     }
-    return nodes;
+    return { textNodes, elements };
   }
 
   function buildReplacement(match, converted, rate) {
@@ -149,10 +164,13 @@
       extra.className = 'kawase-appended';
       extra.textContent = ' (' + converted + ')';
       span.appendChild(extra);
+      for (const child of extra.childNodes) createdNodes.add(child);
+      createdNodes.add(extra);
     } else {
       span.textContent = converted;
     }
 
+    createdNodes.add(span);
     for (const child of span.childNodes) createdNodes.add(child);
     return span;
   }
@@ -219,6 +237,76 @@
     return applied;
   }
 
+  function processElement(element) {
+    if (!element || !element.isConnected) return 0;
+    if (element.querySelector && element.querySelector('[data-kawase]')) return 0;
+
+    const textNodes = [];
+    const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, {
+      acceptNode(node) {
+        if (createdNodes.has(node)) return NodeFilter.FILTER_REJECT;
+        if (isInsideSkipped(node)) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    let n = walker.nextNode();
+    while (n) {
+      textNodes.push(n);
+      n = walker.nextNode();
+    }
+    if (textNodes.length <= 1) return 0;
+
+    let fullText = '';
+    const nodeMap = [];
+    for (const node of textNodes) {
+      const start = fullText.length;
+      fullText += node.nodeValue;
+      const end = fullText.length;
+      nodeMap.push({ node, start, end });
+    }
+
+    const matches = detect.findMatches(fullText, {
+      pageCurrency: state.settings.autoDetectPageCurrency ? state.pageCurrency : null,
+      forced: state.forced,
+      symbolDefaults: state.settings.symbolDefaults
+    });
+    if (matches.length === 0) return 0;
+
+    function findPos(charIndex) {
+      for (const item of nodeMap) {
+        if (charIndex >= item.start && charIndex <= item.end) {
+          return { node: item.node, offset: charIndex - item.start };
+        }
+      }
+      return null;
+    }
+
+    let applied = 0;
+    for (const match of matches.slice().reverse()) {
+      if (state.converted.length + applied >= MAX_CONVERSIONS) break;
+      const result = convertMatch(match);
+      if (!result) continue;
+
+      const startPos = findPos(match.start);
+      const endPos = findPos(match.end);
+      if (!startPos || !endPos) continue;
+
+      const span = buildReplacement(match, result.converted, result.rate);
+      try {
+        const range = document.createRange();
+        range.setStart(startPos.node, startPos.offset);
+        range.setEnd(endPos.node, endPos.offset);
+        range.deleteContents();
+        range.insertNode(span);
+        state.converted.push(span);
+        applied += 1;
+      } catch (err) {
+        // Skip problematic range
+      }
+    }
+    return applied;
+  }
+
   function idle(callback) {
     if (typeof requestIdleCallback === 'function') requestIdleCallback(callback, { timeout: 500 });
     else setTimeout(callback, 16);
@@ -233,13 +321,27 @@
         state.scanning = false;
         return;
       }
-      const slice = state.queue.splice(0, CHUNK_SIZE);
-      for (const node of slice) {
-        if (!node.isConnected) continue;
-        try {
-          processTextNode(node);
-        } catch (error) {
-          // Skip problematic node and continue
+      const item = state.queue.shift();
+      if (item) {
+        if (item.textNodes) {
+          for (const node of item.textNodes) {
+            if (!node.isConnected) continue;
+            try {
+              processTextNode(node);
+            } catch (error) {
+              // Skip problematic node and continue
+            }
+          }
+        }
+        if (item.elements) {
+          for (const el of item.elements) {
+            if (!el.isConnected) continue;
+            try {
+              processElement(el);
+            } catch (error) {
+              // Skip problematic element and continue
+            }
+          }
         }
       }
       if (state.queue.length > 0 && state.converted.length < MAX_CONVERSIONS) idle(step);
@@ -251,9 +353,9 @@
 
   function scan(rootNode) {
     if (!state.active || !state.table) return;
-    const nodes = collectTextNodes(rootNode || document.body);
-    if (nodes.length === 0) return;
-    state.queue.push(...nodes);
+    const candidates = collectCandidates(rootNode || document.body);
+    if (candidates.textNodes.length === 0 && candidates.elements.length === 0) return;
+    state.queue.push(candidates);
     drainQueue();
   }
 

@@ -6,22 +6,31 @@
   const parse = (root.Kawase && root.Kawase.parse) ||
     (typeof require === 'function' ? require('./parse.js') : null);
 
-  const DIGIT = '[0-9\\u0660-\\u0669\\u06f0-\\u06f9\\u0966-\\u096f\\u09e6-\\u09ef\\u0e50-\\u0e59]';
-  const DECIMAL_SEP = '[.,\\u066b]';
+  const DIGIT = '[0-9\\u0660-\\u0669\\u06f0-\\u06f9\\u0966-\\u096f\\u09e6-\\u09ef\\u0e50-\\u0e59\\uff10-\\uff19]';
+  const DECIMAL_SEP = '[.,\\u066b\\uff0e]';
 
   function D(min, max) {
     return DIGIT + '{' + min + ',' + max + '}';
   }
 
-  const GROUP_SEP = '[.,\\u00a0\\u202f\\u2009\\u2007\\u0020\\u0027\\u2019\\u066c]';
-  const GAP = '[\\u0020\\u00a0\\u202f\\u2009\\u200e\\u200f\\u061c]{0,3}';
+  const GROUP_SEP = '[.,\\u00a0\\u202f\\u2009\\u2007\\u0020\\u3000\\u0027\\u2019\\u066c\\uff0c]';
+  const GAP = '[\\u0020\\u00a0\\u202f\\u2009\\u200e\\u200f\\u061c\\u3000]{0,3}';
 
-  const NUMBER =
+  const BASE_NUMBER =
     '(?:' +
       D(1, 2) + '(?:,' + D(2, 2) + ')+,' + D(3, 3) + '(?:\\.' + D(1, 3) + ')?' +
       '|' + D(1, 3) + '(?:' + GROUP_SEP + D(3, 3) + ')+(?:' + DECIMAL_SEP + D(1, 3) + ')?' +
       '|' + DIGIT + '+(?:' + DECIMAL_SEP + D(1, 6) + ')?' +
     ')';
+
+  const CJK_COMPOUND =
+    '(?:' +
+      '(?:' + BASE_NUMBER + GAP + '[\\u5146]' + GAP + ')?' +
+      BASE_NUMBER + GAP + '[\\u5104]' +
+      '(?:' + GAP + BASE_NUMBER + '(?:' + GAP + '[\\u4e07])?)?' +
+    ')';
+
+  const NUMBER = '(?:' + CJK_COMPOUND + '|' + BASE_NUMBER + ')';
 
   const MULTIPLIER =
     '(?:' +
@@ -31,7 +40,7 @@
     ')';
 
   const ADJACENT = /[A-Za-z0-9]/;
-  const ANY_DIGIT = /[0-9\u0660-\u0669\u06f0-\u06f9\u0966-\u096f\u09e6-\u09ef\u0e50-\u0e59]/;
+  const ANY_DIGIT = /[0-9\u0660-\u0669\u06f0-\u06f9\u0966-\u096f\u09e6-\u09ef\u0e50-\u0e59\uff10-\uff19]/;
 
   function escapeRegExp(value) {
     return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -50,11 +59,14 @@
 
     const codes = currencies.MATCHABLE_CODES.join('|');
     const marker = '(?:' + symbols + '|(?:' + codes + ')(?![A-Za-z]))';
+    const rangeLookahead = '(?=[\\s\\u3000]*[〜～~\\-ー][\\s\\u3000]*' + NUMBER + '[\\u4e07\\u5104\\u5146]?[\\s\\u3000]*[円¥￥])';
 
     const source =
       '(?<pre>' + marker + ')' + GAP + '(?<num1>' + NUMBER + ')(?<mul1>' + MULTIPLIER + ')?' +
       '|' +
-      '(?<num2>' + NUMBER + ')(?<mul2>' + MULTIPLIER + ')?' + GAP + '(?<post>' + marker + ')';
+      '(?<num2>' + NUMBER + ')(?<mul2>' + MULTIPLIER + ')?' + GAP + '(?<post>' + marker + ')' +
+      '|' +
+      '(?<num3>' + NUMBER + ')(?<mul3>[\\u4e07\\u5104\\u5146])' + rangeLookahead;
 
     cachedPattern = new RegExp(source, 'gu');
     return cachedPattern;
@@ -83,9 +95,9 @@
       }
 
       const groups = match.groups;
-      const marker = groups.pre || groups.post;
-      const numberRaw = groups.num1 || groups.num2;
-      const multiplierRaw = groups.mul1 || groups.mul2;
+      const marker = groups.pre || groups.post || (groups.num3 ? '円' : null);
+      const numberRaw = groups.num1 || groups.num2 || groups.num3;
+      const multiplierRaw = groups.mul1 || groups.mul2 || groups.mul3;
 
       let start = match.index;
       let end = start + match[0].length;
@@ -104,7 +116,9 @@
       });
       if (!parsed) continue;
 
-      const multiplier = parse.multiplierFor(multiplierRaw);
+      const multiplier = (groups.num3 || /[\u4e07\u5104\u5146]/.test(numberRaw))
+        ? (groups.num3 ? parse.multiplierFor(groups.mul3) : 1)
+        : parse.multiplierFor(multiplierRaw);
       let value = parsed.value * multiplier;
 
       let negative = false;
