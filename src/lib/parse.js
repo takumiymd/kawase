@@ -1,14 +1,15 @@
 ;(function (root) {
   'use strict';
 
-  const SPACE_SEPARATORS = /[\u0020\u00a0\u2007\u2009\u202f\u066c\u0027\u2019]/g;
+  const SPACE_SEPARATORS = /[\u0020\u00a0\u2007\u2009\u202f\u3000\u066c\u0027\u2019]/g;
 
   const DIGIT_RANGES = [
     [0x0660, 0x0669],   // Arabic-Indic
     [0x06f0, 0x06f9],   // Persian
     [0x0966, 0x096f],   // Devanagari
     [0x09e6, 0x09ef],   // Bengali
-    [0x0e50, 0x0e59]    // Thai
+    [0x0e50, 0x0e59],   // Thai
+    [0xff10, 0xff19]    // Fullwidth ０-９
   ];
 
   const ARABIC_DECIMAL = 0x066b;
@@ -21,7 +22,9 @@
     let output = '';
     for (const char of input) {
       const code = char.codePointAt(0);
-      if (code === ARABIC_DECIMAL) { output += '.'; continue; }
+      if (code === ARABIC_DECIMAL || code === 0xff0e) { output += '.'; continue; }
+      if (code === 0xff0c) { output += ','; continue; }
+      if (code === 0x3000) { output += ' '; continue; }
       if (BIDI_MARKS.has(code)) continue;
 
       let mapped = char;
@@ -71,6 +74,45 @@
     if (raw === null || raw === undefined) return null;
 
     const compact = normalizeDigits(raw).trim().replace(SPACE_SEPARATORS, '');
+
+    // CJK compound numbers with 億, 兆, 万
+    if (/[\u4e07\u5104\u5146]/.test(compact)) {
+      let s = compact;
+      let total = 0;
+      let hasCompound = false;
+
+      const choMatch = s.match(/([0-9.,]+)\s*[\u5146]/);
+      if (choMatch) {
+        const parsed = parseAmount(choMatch[1], opts);
+        if (parsed) { total += parsed.value * 1e12; hasCompound = true; }
+        s = s.slice(choMatch.index + choMatch[0].length);
+      }
+
+      const okuMatch = s.match(/([0-9.,]+)\s*[\u5104]/);
+      if (okuMatch) {
+        const parsed = parseAmount(okuMatch[1], opts);
+        if (parsed) { total += parsed.value * 1e8; hasCompound = true; }
+        s = s.slice(okuMatch.index + okuMatch[0].length);
+      }
+
+      const manMatch = s.match(/([0-9.,]+)\s*[\u4e07]/);
+      if (manMatch) {
+        const parsed = parseAmount(manMatch[1], opts);
+        if (parsed) { total += parsed.value * 1e4; hasCompound = true; }
+      } else if (s.trim() && hasCompound) {
+        const parsed = parseAmount(s.trim(), opts);
+        if (parsed) total += parsed.value * 1e4;
+      }
+
+      if (hasCompound) {
+        return {
+          value: total,
+          fractionDigits: 0,
+          decimalSeparator: null
+        };
+      }
+    }
+
     if (!/^\d[\d.,]*$/.test(compact)) return null;
     if (compact.replace(/[.,]/g, '').length > 18) return null;
 
